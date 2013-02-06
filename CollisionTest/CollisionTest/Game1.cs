@@ -20,6 +20,10 @@ namespace CollisionTest {
         Texture2D player;
         MapData mapData;
 
+        Vector2 playerMovement = Vector2.Zero;
+        Vector2 playerPosition;
+        float maxSpeed = 30f;
+
         public Game1() {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
@@ -48,6 +52,8 @@ namespace CollisionTest {
             level = Content.Load<Texture2D>("Background");
             player = Content.Load<Texture2D>("Player");
             mapData = new MapData(Content, GraphicsDevice.Viewport);
+
+            playerPosition = new Vector2(200, 300);
         }
 
         /// <summary>
@@ -68,6 +74,41 @@ namespace CollisionTest {
             if(GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
+
+
+            // player input
+            KeyboardState keyState = Keyboard.GetState();
+            // x-axis
+            if(keyState.IsKeyDown(Keys.A)) {
+                playerMovement.X = -1;
+            } else if(keyState.IsKeyDown(Keys.D)) {
+                playerMovement.X = 1;
+            } else {
+                playerMovement.X = 0;
+            }
+
+            // y-axis
+            if(keyState.IsKeyDown(Keys.W)) {
+                playerMovement.Y = -1;
+            } else if(keyState.IsKeyDown(Keys.S)) {
+                playerMovement.Y = 1;
+            } else {
+                playerMovement.Y = 0;
+            }
+
+
+            // move the player sprite
+            playerPosition += maxSpeed * playerMovement;
+
+            // set the bounds to the size of the viewport
+            int left = GraphicsDevice.Viewport.TitleSafeArea.Left;
+            int right = GraphicsDevice.Viewport.TitleSafeArea.Right - player.Width;
+            playerPosition.X = MathHelper.Clamp(playerPosition.X, left, right);
+
+            int top = GraphicsDevice.Viewport.TitleSafeArea.Top;
+            int bottom = GraphicsDevice.Viewport.TitleSafeArea.Bottom - player.Height;
+            playerPosition.Y = MathHelper.Clamp(playerPosition.Y, top, bottom);
+
             mapData.Update(gameTime, GraphicsDevice.Viewport);
 
             base.Update(gameTime);
@@ -83,7 +124,7 @@ namespace CollisionTest {
             spriteBatch.Begin();
             spriteBatch.Draw(level, new Vector2(0, 0), Color.White);
             mapData.Draw(spriteBatch);
-            spriteBatch.Draw(player, new Vector2(100, 100), Color.White);
+            spriteBatch.Draw(player, playerPosition, Color.White);
             spriteBatch.End();
 
             base.Draw(gameTime);
