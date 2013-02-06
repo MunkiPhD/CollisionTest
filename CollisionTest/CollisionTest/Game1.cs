@@ -19,10 +19,14 @@ namespace CollisionTest {
         Texture2D level;
         Texture2D player;
         MapData mapData;
+        Vector2 playerCenter;
+        SpriteFont someText;
 
         Vector2 playerMovement = Vector2.Zero;
         Vector2 playerPosition;
-        float maxSpeed = 30f;
+        float maxSpeed = 300f;
+
+        string textToDisplay = "none";
 
         public Game1() {
             graphics = new GraphicsDeviceManager(this);
@@ -52,8 +56,10 @@ namespace CollisionTest {
             level = Content.Load<Texture2D>("Background");
             player = Content.Load<Texture2D>("Player");
             mapData = new MapData(Content, GraphicsDevice.Viewport);
+            someText = Content.Load<SpriteFont>("SomeText");
 
             playerPosition = new Vector2(200, 300);
+            playerCenter = new Vector2(player.Width / 2, player.Height / 2);
         }
 
         /// <summary>
@@ -97,8 +103,9 @@ namespace CollisionTest {
             }
 
 
+            float speed = maxSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
             // move the player sprite
-            playerPosition += maxSpeed * playerMovement;
+            playerPosition += speed * playerMovement;
 
             // set the bounds to the size of the viewport
             int left = GraphicsDevice.Viewport.TitleSafeArea.Left;
@@ -110,6 +117,28 @@ namespace CollisionTest {
             playerPosition.Y = MathHelper.Clamp(playerPosition.Y, top, bottom);
 
             mapData.Update(gameTime, GraphicsDevice.Viewport);
+
+            MapLedge currentLedge = mapData.GetLedge(playerPosition.X + playerCenter.X);
+            if(currentLedge != null) {
+                double opposite = (currentLedge.RightPoint.Y - currentLedge.LeftPoint.Y);
+                double adjacent = (currentLedge.RightPoint.X - currentLedge.LeftPoint.X);
+                double ratio = (opposite / adjacent);
+                double angle = Math.Tan(ratio);
+                int newY = (int)((playerPosition.X + playerCenter.X) * Math.Tan(angle));
+                textToDisplay = string.Format("Left: {0} Right: {1} NewY: {2}", currentLedge.LeftPoint, currentLedge.RightPoint, newY);
+
+                int min = (int)Math.Min(currentLedge.RightPoint.Y, currentLedge.LeftPoint.Y);
+                if(currentLedge.RightPoint.Y > currentLedge.LeftPoint.Y)
+                    playerPosition.Y = newY + currentLedge.Adjustment.Y - 65;
+                else
+                    playerPosition.Y =(newY * -1) + currentLedge.Adjustment.Y - 65;
+
+
+            }
+
+
+
+
 
             base.Update(gameTime);
         }
@@ -125,6 +154,7 @@ namespace CollisionTest {
             spriteBatch.Draw(level, new Vector2(0, 0), Color.White);
             mapData.Draw(spriteBatch);
             spriteBatch.Draw(player, playerPosition, Color.White);
+            spriteBatch.DrawString(someText, textToDisplay, new Vector2(10, 10), Color.White);
             spriteBatch.End();
 
             base.Draw(gameTime);

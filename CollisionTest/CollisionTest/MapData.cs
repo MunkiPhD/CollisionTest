@@ -20,11 +20,11 @@ namespace CollisionTest {
             LineTexture = content.Load<Texture2D>("Line");
             AddLedge(new Vector2(0, 10), new Vector2(50, 15));
             AddLedge(new Vector2(50, 15), new Vector2(100, 40));
-            AddLedge(new Vector2(100, 40), new Vector2(150, 45));
-            AddLedge(new Vector2(150, 45), new Vector2(200, 10));
-            AddLedge(new Vector2(200, 10), new Vector2(400, 20));
-            AddLedge(new Vector2(400, 20), new Vector2(600, 30));
-            AddLedge(new Vector2(600, 30), new Vector2(800, 5));
+            AddLedge(new Vector2(100, 40), new Vector2(150, 65));
+            AddLedge(new Vector2(150, 65), new Vector2(200, 10));
+            AddLedge(new Vector2(200, 10), new Vector2(400, 50));
+            AddLedge(new Vector2(400, 50), new Vector2(600, 30));
+            AddLedge(new Vector2(600, 30), new Vector2(800, 65));
         }
 
 
@@ -40,7 +40,7 @@ namespace CollisionTest {
 
         public void Update(GameTime gameTime, Viewport view) {
             foreach(MapLedge ledge in MapLedges) {
-                ledge.Adjustment.Y = view.Bounds.Bottom - 50;
+                ledge.Adjustment.Y = view.Bounds.Bottom - 65;
                 ledge.Adjustment.X = 0;
             }
         }
@@ -52,6 +52,23 @@ namespace CollisionTest {
         /// <param name="ledge"></param>
         public void AddLedge(MapLedge ledge) {
             MapLedges.Add(ledge);
+        }
+
+
+
+        /// <summary>
+        /// Returns the specified ledge if the xlocation falls within
+        /// </summary>
+        /// <param name="xLocation"></param>
+        /// <returns></returns>
+        public MapLedge GetLedge(float xLocation) {
+            foreach(MapLedge ledge in MapLedges) {
+                if(xLocation >= ledge.LeftPoint.X && xLocation <= ledge.RightPoint.X) {
+                    return ledge;
+                }
+            }
+
+            return null;
         }
 
 
