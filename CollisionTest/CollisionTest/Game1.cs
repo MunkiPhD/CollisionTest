@@ -16,6 +16,9 @@ namespace CollisionTest {
     public class Game1 : Microsoft.Xna.Framework.Game {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        Texture2D level;
+        Texture2D player;
+        MapData mapData;
 
         public Game1() {
             graphics = new GraphicsDeviceManager(this);
@@ -42,7 +45,9 @@ namespace CollisionTest {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
+            level = Content.Load<Texture2D>("Background");
+            player = Content.Load<Texture2D>("Player");
+            mapData = new MapData(Content, GraphicsDevice.Viewport);
         }
 
         /// <summary>
@@ -63,7 +68,7 @@ namespace CollisionTest {
             if(GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
-            // TODO: Add your update logic here
+            mapData.Update(gameTime, GraphicsDevice.Viewport);
 
             base.Update(gameTime);
         }
@@ -75,7 +80,11 @@ namespace CollisionTest {
         protected override void Draw(GameTime gameTime) {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            spriteBatch.Begin();
+            spriteBatch.Draw(level, new Vector2(0, 0), Color.White);
+            mapData.Draw(spriteBatch);
+            spriteBatch.Draw(player, new Vector2(100, 100), Color.White);
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }
